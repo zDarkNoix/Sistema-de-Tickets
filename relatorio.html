@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      background-color: #f8f9fa;
+      color: #343a40;
+      padding: 25px;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-top: 0;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #dee2e6;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      padding: 15px;
+      background-color: #e9ecef;
+      border-radius: 8px;
+      margin-bottom: 25px;
+    }
+    .summary-card {
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .summary-card.clickable {
+      cursor: pointer;
+    }
+    .summary-card.clickable:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    }
+    .summary-card .label { font-size: 14px; color: #6c757d; display: block; margin-bottom: 5px; }
+    .summary-card .count { font-size: 26px; font-weight: 700; }
+    .detailed-card .details-text { font-size: 12px; color: #007bff; margin-top: 8px; font-style: italic; }
+    .attempts-summary .attempt-item { display: flex; justify-content: space-between; font-size: 15px; padding: 4px 0; }
+
+    .modal {
+      display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+      overflow: auto; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center;
+    }
+    .modal-content {
+      background-color: #fff; margin: auto; padding: 25px; border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3); width: 90%; max-width: 500px; position: relative;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dee2e6; padding-bottom: 15px; margin-bottom: 20px; }
+    .modal-header h2 { margin: 0; font-size: 20px; }
+    .close-btn { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+    .close-btn:hover { color: #000; }
+    .modal-body { max-height: 60vh; overflow-y: auto; }
+    .modal-body table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .modal-body th, .modal-body td { padding: 10px; text-align: left; border-bottom: 1px solid #f1f1f1; }
+    .modal-body th { background-color: #f8f9fa; font-weight: 600; }
+
+
+    .report-container { display: flex; flex-direction: column; gap: 20px; }
+    .agent-report-block { background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.08); border-left: 5px solid; overflow: hidden; }
+    .agent-header { padding: 15px 20px; background-color: #f1f3f5; }
+    .agent-header .agent-name { font-size: 18px; font-weight: 600; }
+    .agent-stats { display: flex; gap: 20px; padding: 15px 20px; border-bottom: 1px solid #e9ecef; }
+    .agent-stats .stat-item { text-align: center; flex-grow: 1; }
+    .agent-stats .stat-item .label { font-size: 13px; color: #6c757d; }
+    .agent-stats .stat-item .count { font-size: 20px; font-weight: 600; }
+    .date-list { padding: 10px 20px 20px 20px; }
+    .date-list h4 { margin-top: 0; margin-bottom: 10px; font-size: 14px; color: #495057; font-weight: 600; }
+    .date-item { font-size: 14px; color: #6c757d; padding: 2px 0; }
+    .loading, .error, .no-data { text-align: center; padding: 25px; font-style: italic; color: #6c757d; font-size: 16px; }
+  </style>
+</head>
+<body>
+    <h1>Relatório de Desempenho</h1>
+
+  <div id="globalSummary" class="summary-grid"></div>
+  <div id="reportContainer" class="report-container">
+    <p class="loading">Carregando dados do relatório...</p>
+  </div>
+
+  <div id="detailsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Detalhes</h2>
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+      </div>
+      <div id="modalBody" class="modal-body"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', loadReport);
+
+
+    function gid(id) { return document.getElementById(id); }
+    function escapeHtml(unsafe) { return String(unsafe).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+    function openModal(title, contentHtml) {
+      gid('modalTitle').innerText = title;
+      gid('modalBody').innerHTML = contentHtml;
+      gid('detailsModal').style.display = 'flex';
+    }
+    function closeModal() { gid('detailsModal').style.display = 'none'; }
+    window.onclick = function(event) { if (event.target == gid('detailsModal')) closeModal(); }
+
+
+    function loadReport() {
+      google.script.run
+        .withSuccessHandler(renderReport)
+        .withFailureHandler(showReportError)
+        .getReportData();
+    }
+
+    function showReportError(error) {
+      gid('reportContainer').innerHTML = `<p class="error">Falha ao carregar o relatório: ${escapeHtml(error.message || "Erro desconhecido.")}</p>`;
+    }
+
+    function renderReport(data) {
+      if (data && data.error) { showReportError(data.error); return; }
+
+      const summaryContainer = gid('globalSummary');
+      const reportContainer = gid('reportContainer');
+      summaryContainer.innerHTML = '';
+      reportContainer.innerHTML = '';
+
+      const callCounts = data.counts || {};
+      const resolutionCounts = data.resolutionCounts || {};
+      const dailyFinalStatusCounts = data.dailyFinalStatusCounts || {};
+      const agentOptions = data.agents || [];
+      
+
+      let totalResolvido = 0, totalResolvidoSemSucesso = 0, totalSucesso = 0, totalOutrasTentativas = 0;
+      const dailyCallStats = {};
+      for (const agent in callCounts) {
+        for (const date in callCounts[agent]) {
+          const dayData = callCounts[agent][date];
+          totalSucesso += dayData.sucesso || 0;
+          totalOutrasTentativas += (dayData.naoAtende || 0) + (dayData.numeroIncorreto || 0) + (dayData.retornoAgendado || 0);
+          if (!dailyCallStats[date]) dailyCallStats[date] = { sucesso: 0, naoAtende: 0, numeroIncorreto: 0 };
+          dailyCallStats[date].sucesso += dayData.sucesso || 0;
+          dailyCallStats[date].naoAtende += dayData.naoAtende || 0;
+          dailyCallStats[date].numeroIncorreto += dayData.numeroIncorreto || 0;
+        }
+      }
+      for (const agent in resolutionCounts) {
+        totalResolvido += resolutionCounts[agent].resolvido;
+        totalResolvidoSemSucesso += resolutionCounts[agent].resolvidoSemSucesso;
+      }
+
+
+      const sortedCallDates = Object.keys(dailyCallStats).sort((a, b) => new Date(b.split('/')[2], b.split('/')[1] - 1, b.split('/')[0]) - new Date(a.split('/')[2], a.split('/')[1] - 1, a.split('/')[0]));
+      const sortedFinalDates = Object.keys(dailyFinalStatusCounts).sort((a, b) => new Date(b.split('/')[2], b.split('/')[1] - 1, b.split('/')[0]) - new Date(a.split('/')[2], a.split('/')[1] - 1, a.split('/')[0]));
+      let modalContentSucesso = '<table><tr><th>Data</th><th>Sucesso</th><th>Não Atende</th><th>Nº Incorreto</th></tr>';
+      sortedCallDates.forEach(date => {
+        const stats = dailyCallStats[date];
+        modalContentSucesso += `<tr><td>${date}</td><td>${stats.sucesso}</td><td>${stats.naoAtende}</td><td>${stats.numeroIncorreto}</td></tr>`;
+      });
+      modalContentSucesso += '</table>';
+      let modalContentSemSucesso = '<table><tr><th>Data</th><th>Total</th></tr>';
+      sortedFinalDates.forEach(date => {
+        const count = dailyFinalStatusCounts[date].resolvidoSemSucesso;
+        if (count > 0) modalContentSemSucesso += `<tr><td>${date}</td><td>${count}</td></tr>`;
+      });
+      modalContentSemSucesso += '</table>';
+      
+
+      summaryContainer.innerHTML = `
+        <div id="cardComSucesso" class="summary-card clickable">
+          <span class="label">Resolvido c/ Sucesso</span>
+          <span class="count" style="color: #198754;">${totalResolvido}</span>
+          <div class="details-text">Clique para ver detalhes</div>
+        </div>
+        <div id="cardSemSucesso" class="summary-card clickable">
+          <span class="label">Resolvido s/ Sucesso</span>
+          <span class="count" style="color: #fd7e14;">${totalResolvidoSemSucesso}</span>
+          <div class="details-text">Clique para ver detalhes</div>
+        </div>
+        <div class="summary-card attempts-summary">
+          <div class="label">Resumo de Tentativas</div>
+          <div class="attempt-item"><span>Sucesso:</span><strong style="color: #198754;">${totalSucesso}</strong></div>
+          <div class="attempt-item"><span>Outras:</span><strong style="color: #6c757d;">${totalOutrasTentativas}</strong></div>
+        </div>
+      `;
+      gid('cardComSucesso').addEventListener('click', () => openModal('Detalhes de Tentativas de Contato', modalContentSucesso));
+      gid('cardSemSucesso').addEventListener('click', () => openModal('Detalhes de "Resolvido s/ Sucesso"', modalContentSemSucesso));
+
+
+      let hasAnyAgentData = false;
+      agentOptions.forEach(agentName => {
+        const agentResData = resolutionCounts[agentName] || { resolvido: 0, resolvidoSemSucesso: 0 };
+        if (agentResData.resolvido === 0 && agentResData.resolvidoSemSucesso === 0) return;
+
+        hasAnyAgentData = true;
+        const agentColor = ({ "Juliana": "#3498db", "Fagner": "#2ecc71", "Pedro": "#f1c40f", "Debora": "#e74c3c", "Mateus": "#9b59b6" })[agentName] || "#bdc3c7";
+        const agentBlock = document.createElement('div');
+        agentBlock.className = 'agent-report-block';
+        agentBlock.style.borderLeftColor = agentColor;
+        
+        let dateListHtml = '';
+        if (callCounts[agentName]) {
+          const agentDates = Object.keys(callCounts[agentName]).sort((a, b) => new Date(b.split('/')[2], b.split('/')[1] - 1, b.split('/')[0]) - new Date(a.split('/')[2], a.split('/')[1] - 1, a.split('/')[0]));
+          agentDates.forEach(date => {
+            if (callCounts[agentName][date] && callCounts[agentName][date].sucesso > 0) {
+              dateListHtml += `<div class="date-item">${escapeHtml(date)}: <strong>${callCounts[agentName][date].sucesso}</strong> sucesso(s) de contato</div>`;
+            }
+          });
+        }
+        
+        agentBlock.innerHTML = `
+          <div class="agent-header">
+            <span class="agent-name" style="color: ${agentColor};">${escapeHtml(agentName)}</span>
+          </div>
+          <div class="agent-stats">
+            <div class="stat-item">
+              <span class="label">Resolvido c/ Sucesso</span>
+              <span class="count" style="color: #198754;">${agentResData.resolvido}</span>
+            </div>
+            <div class="stat-item">
+              <span class="label">Resolvido s/ Sucesso</span>
+              <span class="count" style="color: #fd7e14;">${agentResData.resolvidoSemSucesso}</span>
+            </div>
+          </div>
+          ${dateListHtml ? `<div class="date-list"><h4>Detalhe de Contatos com Sucesso:</h4>${dateListHtml}</div>` : ''}
+        `;
+        reportContainer.appendChild(agentBlock);
+      });
+
+      if (!hasAnyAgentData) {
+        reportContainer.innerHTML = '<p class="no-data">Nenhum ticket resolvido encontrado para os agentes.</p>';
+      }
+    }
+  </script>
+</body>
+</html>

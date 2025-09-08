@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      margin: 0;
+      background-color: #f7f9fc;
+      color: #333a40;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .container {
+      padding: 25px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #e0e6ed;
+    }
+
+    .header h1 {
+      margin: 0;
+      color: #2c3e50;
+      font-size: 26px;
+      font-weight: 600;
+    }
+
+    .header .actions-container {
+      display: flex;
+      gap: 10px;
+    }
+
+    .sub-filter-buttons button .count {
+      font-weight: bold;
+      margin-left: 6px;
+      color: #0056b3;
+      background-color: rgba(0, 123, 255, 0.1);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    
+    .sub-filter-buttons button.active .count {
+      color: #fff;
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    #addTicketBtn,
+    #refreshTicketsBtn {
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    #addTicketBtn {
+      background-color: #007bff;
+    }
+
+    #addTicketBtn:hover {
+      background-color: #0069d9;
+    }
+
+    #refreshTicketsBtn {
+      background-color: #6c757d;
+    }
+
+    #refreshTicketsBtn:hover {
+      background-color: #5a6268;
+    }
+
+    #addTicketBtn:hover,
+    #refreshTicketsBtn:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      transform: translateY(-1px);
+    }
+
+    #addTicketBtn .icon,
+    #refreshTicketsBtn .icon {
+      font-size: 20px;
+      margin-right: 8px;
+      line-height: 1;
+    }
+
+    #refreshTicketsBtn .icon {
+      font-size: 18px;
+    }
+
+    .filter-buttons {
+      margin-bottom: 25px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .filter-buttons button {
+      padding: 9px 18px;
+      border: 1px solid #ced4da;
+      background-color: #ffffff;
+      color: #495057;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .filter-buttons button:hover {
+      background-color: #f0f2f5;
+      border-color: #adb5bd;
+    }
+
+    .filter-buttons button.active {
+      background-color: #007bff;
+      color: white;
+      border-color: #007bff;
+      box-shadow: 0 1px 3px rgba(0, 123, 255, 0.3);
+    }
+
+    .sub-filter-buttons {
+      margin-bottom: 20px;
+      margin-top: -15px;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 6px;
+      border: 1px solid #e0e6ed;
+      display: none;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .sub-filter-buttons button {
+      padding: 6px 12px;
+      border: 1px solid #ced4da;
+      background-color: #fff;
+      color: #495057;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .sub-filter-buttons button:hover {
+      background-color: #e9ecef;
+    }
+
+    .sub-filter-buttons button.active {
+      background-color: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+
+    .agent-counts-container {
+      padding: 10px;
+      margin-bottom: 20px;
+      margin-top: -15px;
+      background-color: #e9ecef;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      display: none;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+    }
+
+    .agent-count-item {
+      display: inline-flex;
+      align-items: center;
+      background-color: #ffffff;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .agent-count-item .color-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .ligacoes-status-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+
+    .ligacao-status-box {
+      flex: 1;
+      padding: 8px;
+      border-radius: 6px;
+      color: white;
+      font-weight: 600;
+      text-align: center;
+      font-size: 14px;
+      min-width: 120px;
+    }
+
+    .ligacao-status-feita {
+    background-color: #28a745;
+    }
+
+    .ligacao-status-pendente {
+    background-color: #dc3545;
+    }
+
+    .agent-count-item .agent-name {
+      margin-right: 6px;
+      color: #495057;
+    }
+
+    .agent-count-item .count {
+      font-weight: 700;
+      color: #007bff;
+    }
+
+    #statusMessagePanel {
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: none;
+      text-align: center;
+      border-width: 1px;
+      border-style: solid;
+    }
+
+    #statusMessagePanel.success {
+      background-color: #d1e7dd;
+      color: #0f5132;
+      border-color: #badbcc;
+    }
+
+    #statusMessagePanel.error {
+      background-color: #f8d7da;
+      color: #842029;
+      border-color: #f5c2c7;
+    }
+
+    .ticket-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .ticket-summary {
+      background-color: #ffffff;
+      border: 1px solid #e0e6ed;
+      border-left-width: 6px;
+      padding: 18px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .ticket-summary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .ticket-summary.status-novo {
+      border-left-color: #6c757d;
+    }
+
+    .ticket-summary.status-em-andamento {
+      border-left-color: #ffc107;
+    }
+
+    .ticket-summary.status-resolvido {
+      border-left-color: #198754;
+    }
+
+    .ticket-summary h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 17px;
+      font-weight: 600;
+      color: #343a40;
+    }
+
+    .ticket-summary p {
+      font-size: 14px;
+      color: #6c757d;
+      margin-bottom: 5px;
+    }
+
+    .ticket-id {
+      font-weight: 700;
+      color: #007bff;
+    }
+
+    .last-update-info {
+      font-size: 0.8em;
+      color: #6c757d;
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    .stage-1-pending {
+      border-left-color: #28a745 !important;
+    }
+
+    .stage-2-pending {
+      border-left-color: #ffc107 !important;
+    }
+
+    .stage-3-pending {
+      border-left-color: #fd7e14 !important;
+    }
+
+    .stage-4-pending {
+      border-left-color: #dc3545 !important;
+    }
+
+    .stage-5-pending {
+      border-left-color: #6f42c1 !important;
+    }
+
+    .stage-6-pending {
+      border-left-color: #212529 !important;
+    }
+
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.6);
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: auto;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 450px;
+      position: relative;
+    }
+
+    .modal-header {
+      padding-bottom: 15px;
+      border-bottom: 1px solid #e9ecef;
+      margin-bottom: 25px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 22px;
+      color: #343a40;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      color: #888;
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 30px;
+      font-weight: bold;
+      line-height: 1;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+      color: #333;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    #newTicketModal label[for="ticketRowNumber"] {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 500;
+      color: #495057;
+      font-size: 15px;
+    }
+
+    #newTicketModal #ticketRowNumber {
+      width: 100%;
+      padding: 12px 15px;
+      margin-bottom: 25px;
+      border: 1px solid #ced4da;
+      border-radius: 6px;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #495057;
+      background-color: #fff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    #newTicketModal #ticketRowNumber:focus {
+      border-color: #80bdff;
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+    }
+
+    #newTicketModal #ticketRowNumber::placeholder {
+      color: #adb5bd;
+      opacity: 1;
+    }
+
+    #newTicketModal #confirmCreateTicketBtn {
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    #newTicketModal #confirmCreateTicketBtn:hover {
+      background-color: #0069d9;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+      transform: translateY(-1px);
+    }
+
+    #newTicketModal #confirmCreateTicketBtn:active {
+      background-color: #005cbf;
+      transform: translateY(0);
+    }
+
+    #ticketDetailView {
+      background-color: #ffffff;
+      padding: 25px 30px;
+      margin-top: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    #ticketDetailView h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #2c3e50;
+      border-bottom: 1px solid #e9ecef;
+      padding-bottom: 15px;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #495057;
+      font-size: 14px;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="date"],
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 6px;
+      font-size: 15px;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      background-color: #fff;
+      line-height: 1.5;
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group input[type="date"]:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: #80bdff;
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, .25);
+    }
+
+    .form-group input[type="checkbox"] {
+      margin-right: 8px;
+      vertical-align: middle;
+      width: auto;
+      height: 1.1em;
+    }
+
+    .form-group input[type="checkbox"]:disabled+.checkbox-label {
+      color: #adb5bd;
+    }
+
+    .form-group input:disabled,
+    .form-group select:disabled,
+    .form-group textarea:disabled,
+    .form-group button:disabled {
+      background-color: #e9ecef;
+      color: #6c757d;
+      cursor: not-allowed;
+      border-color: #ced4da;
+    }
+
+    .form-group .checkbox-label {
+      font-weight: normal;
+      vertical-align: middle;
+      color: #495057;
+    }
+
+    .readonly-info-section {
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      border: 1px solid #e9ecef;
+    }
+
+    .readonly-info-section h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 18px;
+      color: #343a40;
+      border-bottom: 1px solid #dee2e6;
+      padding-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .ticket-summary.status-resolvido {
+      border-left-color: #198754;
+    }
+
+    .ticket-summary.status-resolvido-sem-sucesso {
+      border-left-color: #fd7e14;
+    }
+
+    .form-group-readonly {
+      margin-bottom: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .form-group-readonly strong {
+      color: #495057;
+      font-weight: 500;
+    }
+
+    .observacoes-finais-section {
+      margin-top: 30px;
+      padding: 25px;
+      border: 1px solid #e0e6ed;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+    }
+
+    .observacoes-finais-section h3 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 18px;
+      color: #343a40;
+      font-weight: 600;
+      border-bottom: 1px solid #dee2e6;
+      padding-bottom: 10px;
+    }
+
+    .observacoes-finais-section .form-group {
+      display: block !important;
+    }
+
+    #message-fechar-ticket {
+      display: none;
+      color: #0f5132;
+      margin-top: 15px;
+      padding: 12px 18px;
+      border: 1px solid #badbcc;
+      background-color: #d1e7dd;
+      border-radius: 6px;
+    }
+
+    .collapsible-header {
+      cursor: pointer;
+      user-select: none;
+      color: #2c3e50;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .collapsible-header:hover {
+      color: #007bff;
+    }
+
+    .toggle-icon {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+
+    .date-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .date-container input[type="date"] {
+      flex-grow: 1;
+    }
+
+    .today-btn {
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid #ced4da;
+      background-color: #f8f9fa;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .today-btn:hover {
+      background-color: #e9ecef;
+    }
+
+    .annotation-buttons {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .annotation-btn {
+      padding: 6px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      border: 1px solid #ced4da;
+      background-color: #f8f9fa;
+      border-radius: 6px;
+    }
+
+    .annotation-btn:hover {
+      background-color: #e9ecef;
+    }
+
+
+    #ticketDetailView .actions {
+      margin-top: 30px;
+      text-align: right;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    #ticketDetailView .actions button {
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    #ticketDetailView .actions button:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+      transform: translateY(-1px);
+    }
+
+    #saveTicketChangesBtn {
+      background-color: #198754;
+      color: white;
+    }
+
+    #saveTicketChangesBtn:hover {
+      background-color: #157347;
+    }
+
+    #closeTicketBtn {
+      background-color: #dc3545;
+      color: white;
+    }
+
+    #closeTicketBtn:hover {
+      background-color: #bb2d3b;
+    }
+
+    #closeTicketBtn:disabled {
+      background-color: #f8d7da;
+      color: #842029;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    #backToListBtn {
+      background-color: #6c757d;
+      color: white;
+    }
+
+    #backToListBtn:hover {
+      background-color: #5a6268;
+    }
+
+    .status-Sucesso {
+      background-color: #d1e7dd !important;
+      color: #0f5132 !important;
+    }
+
+    .status-Não_atende {
+      background-color: #f8d7da !important;
+      color: #842029 !important;
+    }
+
+    .status-Número_incorreto {
+      background-color: #c92a2a !important;
+      color: white !important;
+    }
+
+    .status-Retorno_agendado {
+      background-color: #fff3cd !important;
+      color: #664d03 !important;
+    }
+
+    .classification-Nº_incorreto_/_Ninguém_atende {
+      background-color: #e6cff2 !important;
+      color: #582770 !important;
+    }
+
+    .classification-Uso_fraudulento_das_informações_comerciais {
+      background-color: #b10202 !important;
+      color: white !important;
+    }
+
+    .classification-Comerciante_com_informações_irregulares {
+      background-color: #ffcfc9 !important;
+      color: #7d2b21 !important;
+    }
+
+    .classification-Comerciante_com_informações_regulares {
+      background-color: #d1e7dd !important;
+      color: #0f5132 !important;
+    }
+
+    .loader-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .loader {
+      border: 8px solid #e9ecef;
+      border-top: 8px solid #007bff;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="loader-container" id="loader">
+    <div class="loader"></div>
+  </div>
+  <div class="container">
+    <div class="header">
+      <h1>Sistema de Tickets</h1>
+      <div class="actions-container">
+        <button id="refreshTicketsBtn"><span class="icon">&#x21BB;</span> ATUALIZAR</button>
+        <button id="addTicketBtn"><span class="icon">+</span> Criar Ticket</button>
+      </div>
+    </div>
+    <div id="statusMessagePanel"></div>
+    <div class="filter-buttons">
+      <button id="filterEmAndamento" class="active" onclick="filterTickets('Em Andamento')">Em Andamento</button>
+      <button id="filterResolvido" onclick="filterTickets('Resolvido')">Tickets Resolvidos</button>
+      <button id="filterSemSucesso" onclick="filterTickets('Resolvido S/ Sucesso')">Sem Sucesso</button>
+      
+    </div>
+    <div id="subFilterContainer" class="sub-filter-buttons">
+      <button id="subFilterNone" class="active" onclick="applySubFilter(null)">Todos Em Andamento</button>
+      <button onclick="applySubFilter('B')">1ª Lig. (B pend.)<span id="count-B" class="count"></span></button>
+      <button onclick="applySubFilter('C')">2ª Lig. (C pend.)<span id="count-C" class="count"></span></button>
+      <button onclick="applySubFilter('D')">3ª Lig. (D pend.)<span id="count-D" class="count"></span></button>
+      <button onclick="applySubFilter('E')">4ª Lig. (E pend.)<span id="count-E" class="count"></span></button>
+      <button onclick="applySubFilter('F')">5ª Lig. (F pend.)<span id="count-F" class="count"></span></button>
+      <button onclick="applySubFilter('G')">6ª Lig. (G pend.)<span id="count-G" class="count"></span></button>
+      <button onclick="applySubFilter('AGENDAMENTO')">Agendamento<span id="count-AGENDAMENTO" class="count"></span></button>
+    </div>
+    <div id="agentCountsContainer" class="agent-counts-container"></div>
+    <div id="ticketList" class="ticket-list"></div>
+    <div id="ticketDetailView" style="display:none;"></div>
+  </div>
+  <div id="newTicketModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="close-btn" onclick="closeModal('newTicketModal')">&times;</span>
+        <h2>Criar Novo Ticket</h2>
+      </div>
+      <label for="ticketRowNumber">Número da Linha na Planilha:</label>
+      <input type="number" id="ticketRowNumber" min="5" placeholder="Ex: 5">
+      <button id="confirmCreateTicketBtn">Avançar</button>
+    </div>
+  </div>
+
+  <script>
+    let allTickets = [];
+    let currentOpenTicket = null;
+    let columnDefinitions = {};
+    let currentFilter = "Em Andamento"; 
+    let currentStageFilter = null; 
+    let statusMessageTimeout;
+    
+    const readonlyColsGlobal = ['L','M','N','O','R','S','T','U']; 
+    const masterCheckboxes = ['B','C','D','E','F','G'];
+    const contactPairMappings = { 
+        'B': { dropdown: 'V', date: 'W' }, 'C': { dropdown: 'X', date: 'Y' }, 'D': { dropdown: 'Z', date: 'AA'}, 
+        'E': { dropdown: 'AB',date: 'AC'}, 'F': { dropdown: 'AD',date: 'AE'}, 'G': { dropdown: 'AF',date: 'AG'}  
+    };
+    const contactAttemptDropdowns = ['V', 'X', 'Z', 'AB', 'AD', 'AF']; 
+    const alwaysVisibleGeneralQuestions = ['AJ','AK','AL','AM','AN','AO','AP','AQ','AR','AS','AT','AU','AV','AW'];
+    const agendamentoObservacaoCols = ['AH', 'AI', 'AX'];
+    const agentColors = { 
+        "Juliana": "#3498db", "Fagner": "#2ecc71", "Pedro": "#f1c40f",
+        "Debora": "#e74c3c", "Mateus": "#9b59b6", "Default": "#bdc3c7"
+    };
+
+    const loader = document.getElementById('loader');
+    function gid(id){ return document.getElementById(id); }
+
+function updateSubFilterCounts() {
+    const ongoingTickets = allTickets.filter(t => t.status === "Em Andamento" || t.status === "Novo");
+
+    const counts = { B: 0, C: 0, D: 0, E: 0, F: 0, G: 0, AGENDAMENTO: 0 };
+
+    ongoingTickets.forEach(ticket => {
+
+        if (!normalizeCheckboxValue(ticket.campos.B)) {
+            counts.B++;
+        } else if (!normalizeCheckboxValue(ticket.campos.C)) {
+            counts.C++;
+        } else if (!normalizeCheckboxValue(ticket.campos.D)) {
+            counts.D++;
+        } else if (!normalizeCheckboxValue(ticket.campos.E)) {
+            counts.E++;
+        } else if (!normalizeCheckboxValue(ticket.campos.F)) {
+            counts.F++;
+        } else if (!normalizeCheckboxValue(ticket.campos.G)) {
+            counts.G++;
+        }
+
+
+        let hasRetorno = false;
+        let hasSucesso = false;
+        for (const col of contactAttemptDropdowns) {
+            if (ticket.campos[col] === 'Retorno agendado') hasRetorno = true;
+            if (ticket.campos[col] === 'Sucesso') hasSucesso = true;
+        }
+        if (hasRetorno && !hasSucesso) {
+            counts.AGENDAMENTO++;
+        }
+    });
+
+
+    for (const stage in counts) {
+        const countElement = gid(`count-${stage}`);
+        if (countElement) {
+            countElement.innerText = `[${counts[stage]}]`;
+        }
+    }
+}
+
+    function showLoader() { loader.style.display = 'flex'; }
+    function hideLoader() { loader.style.display = 'none'; }
+    function showStatusMessage(message, type, duration = 5000) {
+        const panel = gid('statusMessagePanel');
+        if (!panel) return;
+        clearTimeout(statusMessageTimeout); 
+        panel.textContent = message; panel.className = 'status-message'; panel.classList.add(type); 
+        panel.style.display = 'block';
+        statusMessageTimeout = setTimeout(() => { panel.style.display = 'none'; panel.className = 'status-message'; }, duration);
+    }
+
+    function toggleSectionVisibility(headerElement, contentId) {
+      const content = gid(contentId);
+      const icon = headerElement.querySelector('.toggle-icon');
+
+      if (content.style.display === 'none') {
+        content.style.display = 'block';
+        if (icon) icon.textContent = '[-]';
+      } else {
+        content.style.display = 'none';
+        if (icon) icon.textContent = '[+]';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      showLoader();
+      google.script.run
+        .withSuccessHandler(defs => { columnDefinitions = defs; loadInitialTickets(); })
+        .withFailureHandler(showError)
+        .getColumnDefinitions();
+      gid('addTicketBtn').addEventListener('click', () => { gid('ticketRowNumber').value = ''; openModal('newTicketModal'); });
+      gid('confirmCreateTicketBtn').addEventListener('click', processNewTicketCreation);
+      gid('refreshTicketsBtn').addEventListener('click', () => {
+        showStatusMessage('Atualizando lista de tickets...', 'success', 2000); 
+        loadInitialTickets(); 
+      });
+    });
+
+    function normalizeCheckboxValue(value) {
+        if (value === "" || value === undefined || value === null) { return false; }
+        return String(value).toLowerCase() === 'true' || value === true;
+    }
+    function loadInitialTickets() {
+      showLoader();
+      google.script.run
+        .withSuccessHandler(summaryTickets => {
+          hideLoader();
+          if (summaryTickets && summaryTickets.error) { showError(summaryTickets.error); allTickets = []; } 
+          else { allTickets = summaryTickets || []; } 
+          showTicketList(); 
+        })
+        .withFailureHandler(err => { hideLoader(); showError(err); allTickets = []; showTicketList(); })
+        .getAllTickets(); 
+    }
+    function processNewTicketCreation() {
+      const rowNumInput = gid('ticketRowNumber'); const rowNum = parseInt(rowNumInput.value);
+      if (!rowNum || rowNum < 5) { showStatusMessage('Por favor, insira um número de linha válido (>= 5).', 'error'); rowNumInput.focus(); return; }
+      closeModal('newTicketModal'); showLoader();
+      google.script.run 
+        .withSuccessHandler(ticketDetails => { 
+          hideLoader(); if (ticketDetails.error) { showError(ticketDetails.error); return; }
+          masterCheckboxes.forEach(cbCol => { ticketDetails.campos[cbCol] = normalizeCheckboxValue(ticketDetails.campos[cbCol]); });
+          
+          const summary = {
+              id: ticketDetails.id,
+              nomeLoja: ticketDetails.campos['L'] || "Loja não definida",
+              status: ticketDetails.status,
+              logUltimaAlteracao: ticketDetails.campos['AZ'] || "",
+              campos: {}
+          };
+
+          masterCheckboxes.forEach(mc => summary.campos[mc] = ticketDetails.campos[mc]);
+          contactAttemptDropdowns.forEach(dd => summary.campos[dd] = ticketDetails.campos[dd]);
+
+          const idx = allTickets.findIndex(t => t.id === ticketDetails.id);
+          if (idx > -1) allTickets[idx] = summary; else allTickets.push(summary);
+
+          if (ticketDetails.status !== 'Resolvido') updateActiveTicketInLocalStorage(ticketDetails.id, true);
+          displayTicketDetails(ticketDetails.id, true); 
+        })
+        .withFailureHandler(err => { hideLoader(); showError(err); })
+        .createOrUpdateTicket(rowNum); 
+    }
+    
+    function setDateToToday(button) {
+        const container = button.parentElement;
+        const dateInput = container.querySelector('input[type="date"]');
+        if (dateInput) {
+            const today = new Date();
+
+            const formattedDate = today.toISOString().split('T')[0];
+            dateInput.value = formattedDate;
+        }
+    }
+
+    function addAnnotation(text) {
+        const textarea = gid('field-AI');
+        if (textarea) {
+            const existingText = textarea.value.trim();
+
+            textarea.value = (existingText ? '' : '') + text;
+            textarea.focus();
+            textarea.scrollTop = textarea.scrollHeight;
+        }
+    }
+    
+
+function renderTicketList() {
+      const listDiv = gid('ticketList'); listDiv.innerHTML = ''; 
+      
+
+      let tempFiltered = allTickets.filter(t => {
+        if (currentFilter === "Em Andamento") {
+          return t.status === "Em Andamento" || t.status === "Novo";
+        }
+        return t.status === currentFilter;
+      });
+
+      if (currentFilter === "Em Andamento" && currentStageFilter) {
+          if (currentStageFilter === 'AGENDAMENTO') {
+              tempFiltered = tempFiltered.filter(ticket => {
+                  const campos = ticket.campos || {}; let hasRetorno = false; let hasSucesso = false;
+                  for (const col of contactAttemptDropdowns) {
+                      if (campos[col] === 'Retorno agendado') hasRetorno = true;
+                      if (campos[col] === 'Sucesso') { hasSucesso = true; break; }
+                  }
+                  return hasRetorno && !hasSucesso;
+              });
+          } else { 
+              tempFiltered = tempFiltered.filter(ticketSummary => { 
+                  const stageToFilter = currentStageFilter;
+                  const stageIndex = masterCheckboxes.indexOf(stageToFilter);
+                  if (stageIndex === -1) return false;
+                  const isCurrentStagePending = !normalizeCheckboxValue(ticketSummary.campos[stageToFilter]);
+                  if (!isCurrentStagePending) return false;
+                  for (let i = 0; i < stageIndex; i++) {
+                      const previousStage = masterCheckboxes[i];
+                      if (!normalizeCheckboxValue(ticketSummary.campos[previousStage])) return false;
+                  }
+                  return true;
+              });
+          }
+      }
+
+      if (tempFiltered.length === 0) { listDiv.innerHTML = `<p>Nenhum ticket para os filtros aplicados.</p>`; return; }
+
+      tempFiltered.sort((a,b) => a.id - b.id).forEach(t_summary => { 
+          const div = document.createElement('div');
+          div.classList.add('ticket-summary');
+      
+          let sCls = '';
+
+          if (t_summary.status === "Resolvido") {
+              sCls = 'status-resolvido';
+          } else if (t_summary.status === "Resolvido S/ Sucesso") {
+              sCls = 'status-resolvido-sem-sucesso';
+          } else { // Para "Em Andamento"
+              let stageFound = false;
+              for (let i = 0; i < masterCheckboxes.length; i++) {
+                  const masterCheckbox = masterCheckboxes[i];
+                  if (t_summary.campos && !normalizeCheckboxValue(t_summary.campos[masterCheckbox])) {
+                      sCls = `stage-${i + 1}-pending`;
+                      stageFound = true;
+                      break;
+                  }
+              }
+              if (!stageFound) {
+                  sCls = 'status-em-andamento'; 
+              }
+          }
+          div.classList.add(sCls);
+          
+          const nomeDaLoja = t_summary.nomeLoja ? escapeHtml(t_summary.nomeLoja) : "Loja não definida";
+          let ticketHTML = `<h3><span class="ticket-id">ID #${t_summary.id}</span> - ${nomeDaLoja}</h3> <p>Status: ${escapeHtml(t_summary.status)}</p>`;
+          if (t_summary.logUltimaAlteracao) { ticketHTML += `<p class="last-update-info">${escapeHtml(t_summary.logUltimaAlteracao)}</p>`; }
+          div.innerHTML = ticketHTML;
+          div.onclick = () => displayTicketDetails(t_summary.id); 
+          listDiv.appendChild(div);
+      });
+    }
+    
+    function displayTicketDetails(ticketId, detailsAlreadyLoaded = false) {
+        gid('ticketList').style.display = 'none';
+        gid('filterEmAndamento').parentElement.style.display = 'none'; 
+        gid('statusMessagePanel').style.display = 'none'; 
+        gid('subFilterContainer').style.display = 'none';
+        gid('agentCountsContainer').style.display = 'none';
+        const detailView = gid('ticketDetailView');
+        detailView.innerHTML = ''; 
+
+        const renderLogic = (ticketDetails) => {
+            currentOpenTicket = ticketDetails;
+            masterCheckboxes.forEach(cbCol => { currentOpenTicket.campos[cbCol] = normalizeCheckboxValue(currentOpenTicket.campos[cbCol]); });
+            renderFullTicketForm(currentOpenTicket);
+            console.log("Dados recebidos do backend:", ticketDetails); 
+        };
+
+        if (detailsAlreadyLoaded && currentOpenTicket) { renderLogic(currentOpenTicket); } 
+        else {
+            showLoader();
+            google.script.run
+                .withSuccessHandler(ticketDetails => {
+                    hideLoader();
+                    if (ticketDetails.error) { showError(ticketDetails.error); showTicketList(); return; }
+                    renderLogic(ticketDetails);
+                })
+                .withFailureHandler(err => { hideLoader(); showError(err); showTicketList(); })
+                .getTicketDetails(ticketId);
+        }
+    }
+
+function renderFullTicketForm(ticketData) {
+        const detailView = gid('ticketDetailView');
+        detailView.innerHTML = ''; 
+        
+        let activeDateColumn = null;
+        if (ticketData.status !== 'Resolvido') {
+            for (const masterCb of masterCheckboxes) {
+                const isMasterSaved = normalizeCheckboxValue(ticketData.campos[masterCb]);
+                if (!isMasterSaved) {
+                    activeDateColumn = contactPairMappings[masterCb].date;
+                    break; 
+                }
+            }
+        }
+        
+        let content = `<h2>Ticket ID #${ticketData.id}: ${escapeHtml(ticketData.clienteNome)}</h2>`;
+        content += `<p>Status: <span id="ticketStatusDetail">${escapeHtml(ticketData.status)}</span></p>`;
+        
+        content += `<div class="ligacoes-status-container">`;
+        masterCheckboxes.forEach((col, index) => {
+            const isFeita = normalizeCheckboxValue(ticketData.campos[col]);
+            const statusClass = isFeita ? 'ligacao-status-feita' : 'ligacao-status-pendente';
+            const label = `${index + 1}° Ligação`;
+            content += `<div class="ligacao-status-box ${statusClass}">${label}</div>`;
+        });
+        content += `</div>`;
+
+        content += `<div class="readonly-info-section"><h3>Informações Fixas</h3>`;
+        readonlyColsGlobal.forEach(colKey => {
+            if (columnDefinitions.hasOwnProperty(colKey)) {
+                const def = columnDefinitions[colKey]; 
+                const val = ticketData.campos[colKey] !== undefined ? ticketData.campos[colKey] : "N/A";
+                content += `<div class="form-group-readonly"><strong>${escapeHtml(def)}:</strong> ${escapeHtml(val)}</div>`;
+            }
+        });
+        content += `</div>`;
+
+        if (ticketData.familiares && ticketData.familiares.length > 0) {
+            const headerId = 'familiares-header';
+            const contentId = 'familiares-content';
+
+            content += `<div class="readonly-info-section">`;
+            content += `  <h3 id="${headerId}" class="collapsible-header" onclick="toggleSectionVisibility(this, '${contentId}')">`;
+            content += `    Informações Familiares (${ticketData.familiares.length})`;
+            content += `    <span class="toggle-icon">[+]</span>`;
+            content += `  </h3>`;
+            content += `  <div id="${contentId}" style="display: none;">`;
+            
+            ticketData.familiares.forEach((familiar, index) => {
+                const style = index > 0 ? 'margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;' : 'padding-top: 15px;';
+                content += `    <div style="${style}">`;
+                content += `      <div class="form-group-readonly"><strong>Familiar ${index + 1}</strong></div>`;
+                content += `      <div class="form-group-readonly" style="padding-left: 15px;"><strong>Parentesco:</strong> ${escapeHtml(familiar.parentesco)}</div>`;
+                content += `      <div class="form-group-readonly" style="padding-left: 15px;"><strong>Nome:</strong> ${escapeHtml(familiar.nome)}</div>`;
+                content += `      <div class="form-group-readonly" style="padding-left: 15px;"><strong>Documento:</strong> ${escapeHtml(familiar.documento)}</div>`;
+                content += `    </div>`;
+            });
+            content += `  </div>`;
+            content += `</div>`;
+        }
+
+        const savedStates = {};
+        masterCheckboxes.forEach(mc => savedStates[mc] = normalizeCheckboxValue(ticketData.campos[mc]));
+        const allMastersCompleted = masterCheckboxes.every(mc => savedStates[mc]);
+
+        for (const col in columnDefinitions) {
+            if (readonlyColsGlobal.includes(col) || agendamentoObservacaoCols.includes(col) ) continue; 
+
+            const def = columnDefinitions[col]; 
+            const valorAtual = ticketData.campos[col];
+            const labelText = typeof def === 'string' ? def : def.pergunta;
+            let formGroupId = `form-group-${col}`;
+
+            content += `<div class="form-group" id="${formGroupId}">`;
+            content += `  <label for="field-${col}">${escapeHtml(labelText)}:</label>`;
+
+            if (masterCheckboxes.includes(col)) { 
+                const isSavedTrue = normalizeCheckboxValue(valorAtual); const isDisabled = isSavedTrue; 
+                content += `<input type="checkbox" id="field-${col}" data-col="${col}" ${isSavedTrue ? 'checked' : ''} ${isDisabled ? 'disabled' : ''} onchange="atualizarControlesFinais()"> <label class="checkbox-label" for="field-${col}">Sim</label>`;
+            } else if (contactAttemptDropdowns.includes(col)) { 
+                content += `<select id="field-${col}" data-col="${col}" onchange="atualizarControlesFinais()" ${allMastersCompleted ? 'disabled' : ''}>`;
+                content += `  <option value="" ${valorAtual === "" || valorAtual === undefined ? 'selected' : ''}>Selecione...</option>`;
+                (def.opcoes || []).forEach(opt => { content += `<option value="${escapeHtml(opt)}" ${String(valorAtual)===String(opt)?'selected':''}>${escapeHtml(opt)}</option>`; });
+                content += `</select>`;
+            } else if (['W','Y','AA','AC','AE','AG', 'S'].includes(col)) { 
+                let dateValue = formatDateForInput(valorAtual); 
+
+                if (!dateValue && col === activeDateColumn) {
+                    const today = new Date();
+                    const formattedDate = today.toISOString().split('T')[0];
+                    dateValue = formattedDate;
+                }
+
+                const isDateSaved = !!valorAtual; 
+                const isDisabled = allMastersCompleted || isDateSaved;
+
+                content += `<div class="date-container">`;
+                content += `  <input type="date" id="field-${col}" data-col="${col}" value="${dateValue}" ${isDisabled ? 'disabled' : ''}>`;
+                content += `  <button type="button" class="today-btn" onclick="setDateToToday(this)" ${isDisabled ? 'disabled' : ''}>Hoje</button>`;
+                content += `</div>`;
+            } else if (col === 'AV' || col === 'AW') { 
+                const isDisabled = (col === 'AW');
+                const placeholderText = (col === 'AW') ? 'O Agente será selecionado automaticamente...' : 'Selecione...';
+                content += `<select id="field-${col}" data-col="${col}" onchange="updateDropdownColor(this)" ${isDisabled ? 'disabled' : ''}>`;
+                content += `  <option value="" ${valorAtual === "" || valorAtual === undefined ? 'selected' : ''}>${placeholderText}</option>`;
+                (def.opcoes || []).forEach(opt => { content += `<option value="${escapeHtml(opt)}" ${String(valorAtual)===String(opt)?'selected':''}>${escapeHtml(opt)}</option>`; });
+                content += `</select>`;
+            } else if (col.match(/^[A-Z]{2}$/) && col >= 'AJ' && col <= 'AU') { 
+                content += `<select id="field-${col}" data-col="${col}">`;
+                content += `  <option value="" ${valorAtual === "" || valorAtual === undefined ? 'selected' : ''}>Selecione...</option>`;
+                content += `  <option value="Sim" ${String(valorAtual).toLowerCase()==="sim"?'selected':''}>Sim</option>`;
+                content += `  <option value="Não" ${String(valorAtual).toLowerCase()==="não"?'selected':''}>Não</option>`;
+                content += `  <option value="Não soube responder" ${String(valorAtual).toLowerCase()==="não soube responder"?'selected':''}>Não soube responder</option>`; 
+                content += `</select>`;
+            }
+            content += `</div>`;
+        }
+        
+        content += `<div class="observacoes-finais-section"><h3>AGENDAMENTO E OBSERVAÇÕES</h3>`;
+        agendamentoObservacaoCols.forEach(col => { 
+            if (columnDefinitions.hasOwnProperty(col)) {
+                const def = columnDefinitions[col];
+                const valorAtual = ticketData.campos[col] !== undefined ? ticketData.campos[col] : "";
+                const labelText = typeof def === 'string' ? def : def.pergunta; 
+                content += `<div class="form-group" id="form-group-${col}">`; 
+                content += `  <label for="field-${col}">${escapeHtml(labelText)}:</label>`;
+                if (col === 'AH' || col === 'AX') { 
+                    content += `  <textarea id="field-${col}" data-col="${col}" rows="4">${escapeHtml(String(valorAtual))}</textarea>`;
+                } else if (col === 'AI') {
+                    content += `  <textarea id="field-${col}" data-col="${col}" rows="4">${escapeHtml(String(valorAtual))}</textarea>`;
+                    content += `  <div class="annotation-buttons">`;
+                    content += `    <button type="button" class="annotation-btn" onclick="addAnnotation('Caixa Postal')">Caixa Postal</button>`;
+                    content += `    <button type="button" class="annotation-btn" onclick="addAnnotation('Desligado/Bloqueado')">Desligado/Bloqueado</button>`;
+                    content += `    <button type="button" class="annotation-btn" onclick="addAnnotation('Voice Mail')">Voice Mail</button>`;
+                    content += `    <button type="button" class="annotation-btn" onclick="addAnnotation('Ocupado')">Ocupado</button>`;
+                    content += `    <button type="button" class="annotation-btn" onclick="addAnnotation('Não chama')">Não chama</button>`;
+                    content += `  </div>`;
+                }
+                content += `</div>`;
+            }
+        });
+        content += `</div>`; 
+
+        content += `<div id="message-fechar-ticket">Pelo menos uma tentativa de contato ativa resultou em 'Sucesso' OU o Checkbox G foi marcado.</div>`;
+        content += `
+                <div class="actions">
+                    <button id="backToListBtn">Voltar para Lista</button>
+                    <button id="saveTicketChangesBtn">Salvar Alterações</button>
+                    ${ticketData.status !== 'Resolvido' ? '<button id="closeTicketBtn" disabled>Fechar Ticket</button>' : ''} 
+                </div>`;
+        detailView.innerHTML = content;
+        detailView.style.display = 'block';
+        
+        configurarVisibilidadeAgrupada(); 
+
+        gid('backToListBtn').addEventListener('click', showTicketList);
+        gid('saveTicketChangesBtn').addEventListener('click', () => saveChanges(false));
+        const closeBtnElem = gid('closeTicketBtn');
+        if (closeBtnElem) { closeBtnElem.addEventListener('click', () => saveChanges(true)); }
+        document.querySelectorAll(`#ticketDetailView select[data-col]`).forEach(select => { if (select.onchange) updateDropdownColor(select); });
+    }
+
+    function setGroupVisible(groupId, isVisible) {
+        const group = gid(groupId);
+        if (group) { group.style.display = isVisible ? 'block' : 'none'; }
+    }
+
+    function configurarVisibilidadeAgrupada() {
+        const savedStates = {};
+        masterCheckboxes.forEach(mc => savedStates[mc] = normalizeCheckboxValue(currentOpenTicket.campos[mc]));
+
+        setGroupVisible('form-group-B', true);
+        alwaysVisibleGeneralQuestions.forEach(col => { setGroupVisible(`form-group-${col}`, true); });
+        agendamentoObservacaoCols.forEach(col => { setGroupVisible(`form-group-${col}`, true); });
+
+        for (let i = 1; i < masterCheckboxes.length; i++) { 
+            setGroupVisible(`form-group-${masterCheckboxes[i]}`, false);
+        }
+        Object.values(contactPairMappings).forEach(pair => { 
+            setGroupVisible(`form-group-${pair.dropdown}`, false);
+            setGroupVisible(`form-group-${pair.date}`, false);
+        });
+        
+        let previousMasterEffectivelySaved = true; 
+        let activeStagePairShown = false;
+        for (const masterCb of masterCheckboxes) { 
+            const isMasterSavedInTicket = savedStates[masterCb]; 
+            const pairInfo = contactPairMappings[masterCb]; 
+
+            if (previousMasterEffectivelySaved) { 
+                if (masterCb !== 'B') { setGroupVisible(`form-group-${masterCb}`, true); }
+                if (pairInfo && !isMasterSavedInTicket && !activeStagePairShown) {
+                    setGroupVisible(`form-group-${pairInfo.dropdown}`, true);
+                    setGroupVisible(`form-group-${pairInfo.date}`, true);
+                    activeStagePairShown = true; 
+                }
+            }
+            if (!isMasterSavedInTicket) { previousMasterEffectivelySaved = false; }
+        }
+
+        if (masterCheckboxes.every(mc => savedStates[mc])) {
+            Object.values(contactPairMappings).forEach(pair => {
+                setGroupVisible(`form-group-${pair.dropdown}`, true);
+                setGroupVisible(`form-group-${pair.date}`, true);
+            });
+            for (let i = 1; i < masterCheckboxes.length; i++) { setGroupVisible(`form-group-${masterCheckboxes[i]}`, true); }
+        }
+        
+        atualizarControlesFinais(); 
+    }
+
+    function atualizarControlesFinais() {
+        const closeBtn = gid('closeTicketBtn');
+        const msgFecharTicket = gid('message-fechar-ticket'); 
+        const cbG_el = gid('field-G'); 
+
+        if (!closeBtn || !msgFecharTicket) { return; }
+
+        let houveSucessoEmContatoVisivel = false;
+        for (const col of contactAttemptDropdowns) { 
+            const dropdownElement = gid(`field-${col}`);
+            const formGroupElement = gid(`form-group-${col}`);
+            if (dropdownElement && formGroupElement && formGroupElement.style.display !== 'none' && dropdownElement.value === 'Sucesso') {
+                houveSucessoEmContatoVisivel = true; break; 
+            }
+        }
+        const isG_checked = cbG_el ? cbG_el.checked : false;
+        const podeFecharTicket = houveSucessoEmContatoVisivel || isG_checked;
+        
+        closeBtn.disabled = !podeFecharTicket;
+        msgFecharTicket.style.display = podeFecharTicket ? 'block' : 'none';
+
+        if (podeFecharTicket) { 
+            if (isG_checked && houveSucessoEmContatoVisivel) { msgFecharTicket.textContent = "A 6° ligação foi marcada como feita ou sucesso na ligação. Ticket pode ser fechado."; }
+            else if (isG_checked) { msgFecharTicket.textContent = "A 6° ligação foi marcada como feita, O botão de 'Fechar Ticket' foi liberado."; }
+            else { msgFecharTicket.textContent = "Pelo menos uma tentativa de contato resultou em 'Sucesso'."; }
+        }
+    }
+    
+    function saveChanges(finalizarTicket = false) {
+        if (!currentOpenTicket) return;
+        if (finalizarTicket) {
+            let podeFecharPeloSucesso = false;
+            for (const col of contactAttemptDropdowns) {
+                const dropdown = gid(`field-${col}`);
+                if (dropdown && dropdown.offsetParent !== null && dropdown.value === 'Sucesso') { podeFecharPeloSucesso = true; break; }
+            }
+            const cbG_el = gid('field-G');
+            const gEstaMarcado = cbG_el ? cbG_el.checked : false;
+            if (!podeFecharPeloSucesso && !gEstaMarcado) { 
+                showStatusMessage("Para fechar: Checkbox G marcado OU um contato ativo 'Sucesso'.", 'error'); return; 
+            }
+        }
+        showLoader(); 
+        const updatedData = {id:currentOpenTicket.id, campos:{}, finalizar:finalizarTicket};
+
+        for (const col in columnDefinitions) {
+             if (readonlyColsGlobal.includes(col)) {
+                 if(currentOpenTicket.campos.hasOwnProperty(col)){ updatedData.campos[col] = currentOpenTicket.campos[col];} continue; 
+            }
+            const fieldEl = gid(`field-${col}`);
+            
+            if (fieldEl) { 
+
+                if (fieldEl.offsetParent === null) {
+
+                    if (currentOpenTicket.campos.hasOwnProperty(col)) {
+                        updatedData.campos[col] = currentOpenTicket.campos[col];
+                    }
+                    continue;
+                }
+
+                if (masterCheckboxes.includes(col)) { updatedData.campos[col] = fieldEl.checked; }
+                else if (fieldEl.type === 'date') { updatedData.campos[col] = fieldEl.value; }
+                else if (fieldEl.tagName === 'TEXTAREA') { updatedData.campos[col] = fieldEl.value; }
+                else { updatedData.campos[col] = fieldEl.value; }
+
+            } else if (currentOpenTicket.campos.hasOwnProperty(col)) { 
+                if (!gid(`form-group-${col}`)) { updatedData.campos[col] = currentOpenTicket.campos[col]; }
+            }
+        }
+        google.script.run
+            .withSuccessHandler(savedTicket => {
+                hideLoader(); if (savedTicket.error) { showError(savedTicket.error); return; }
+                masterCheckboxes.forEach(c => savedTicket.campos[c] = normalizeCheckboxValue(savedTicket.campos[c]));
+                if (finalizarTicket) {
+                    showStatusMessage(`Ticket ID #${savedTicket.id} fechado!`, 'success');
+                    updateActiveTicketInLocalStorage(savedTicket.id, false); 
+                    currentFilter = 'Resolvido'; loadInitialTickets(); 
+                } else {
+                    showStatusMessage(`Ticket ID #${savedTicket.id} salvo!`, 'success');
+                    if(savedTicket.status!=='Resolvido') updateActiveTicketInLocalStorage(savedTicket.id,true); else updateActiveTicketInLocalStorage(savedTicket.id,false);
+                    loadInitialTickets();
+
+                    displayTicketDetails(savedTicket.id, false);
+                }
+            })
+            .withFailureHandler(err => { hideLoader(); showError(err); })
+            .saveTicketData(updatedData);
+    }
+
+    function formatDateForInput(dateStringOrDate) {
+        if (!dateStringOrDate) return "";
+        if (typeof dateStringOrDate === 'string' && dateStringOrDate.match(/^\d{4}-\d{2}-\d{2}$/)) { return dateStringOrDate; }
+        if (typeof dateStringOrDate === 'string' && dateStringOrDate.match(/^\d{2}\/\d{2}\/\d{4}$/)) { const parts = dateStringOrDate.split('/'); return `${parts[2]}-${parts[1]}-${parts[0]}`; }
+        if (typeof dateStringOrDate === 'string' && dateStringOrDate.startsWith("Date(")) { try { const dp = dateStringOrDate.substring(5,dateStringOrDate.length-1).split(","); const d = new Date(parseInt(dp[0]),parseInt(dp[1]),parseInt(dp[2])); return `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}-${('0'+d.getDate()).slice(-2)}`; } catch(e){ return "";} }
+        if (dateStringOrDate instanceof Date) { return `${dateStringOrDate.getFullYear()}-${('0'+(dateStringOrDate.getMonth()+1)).slice(-2)}-${('0'+dateStringOrDate.getDate()).slice(-2)}`; }
+        return ""; 
+    }
+    function updateDropdownColor(selectElement) {
+        const col = selectElement.dataset.col; const selectedValue = selectElement.value;
+        const classPrefixes = ['status-', 'classification-'];
+        classPrefixes.forEach(p => { Array.from(selectElement.classList).filter(c=>c.startsWith(p)).forEach(c=>selectElement.classList.remove(c));});
+        let colorClsPfx = '';
+        if (contactAttemptDropdowns.includes(col)) colorClsPfx = 'status-'; 
+        else if (col==='AV') colorClsPfx = 'classification-'; 
+        if (colorClsPfx && selectedValue) selectElement.classList.add(colorClsPfx + selectedValue.replace(/[^a-zA-Z0-9À-ú]/g, '_'));
+    }
+function showTicketList() {
+        gid('ticketDetailView').style.display = 'none'; gid('ticketList').style.display = 'grid'; 
+        gid('filterEmAndamento').parentElement.style.display = 'flex'; 
+        gid('subFilterContainer').style.display = (currentFilter === 'Em Andamento' ? 'flex' : 'none');
+        gid('agentCountsContainer').style.display = (currentFilter === 'Resolvido' ? 'flex' : 'none');
+        currentOpenTicket = null; 
+        
+
+        gid('filterEmAndamento').classList.toggle('active', currentFilter === 'Em Andamento');
+        gid('filterResolvido').classList.toggle('active', currentFilter === 'Resolvido');
+        gid('filterSemSucesso').classList.toggle('active', currentFilter === 'Resolvido S/ Sucesso'); // NOVO
+
+        if (currentFilter === 'Em Andamento') {
+            const subFilterButtons = gid('subFilterContainer').querySelectorAll('button');
+            subFilterButtons.forEach(button => {
+                button.classList.remove('active'); const onclickAttr = button.getAttribute('onclick'); 
+                const match = onclickAttr ? onclickAttr.match(/applySubFilter\(([^)]*)\)/) : null;
+                const buttonCriteria = match ? match[1] === 'null' ? null : match[1].replace(/'/g, '') : 'unknown';
+                if (currentStageFilter === buttonCriteria) button.classList.add('active');
+            });
+        }
+        updateSubFilterCounts();
+
+        renderTicketList(); 
+    }
+   function applySubFilter(stageMasterCheckbox) { 
+        currentStageFilter = stageMasterCheckbox; showTicketList(); 
+    }
+    function filterTickets(status) { 
+      currentFilter = status; 
+      if (status !== 'Em Andamento') { currentStageFilter = null; }
+      else { if(currentStageFilter === null) { const btnNone = gid('subFilterNone'); if(btnNone) btnNone.classList.add('active');} }
+      showTicketList(); 
+    }
+    function renderAgentCounts(counts) { 
+        const container = gid('agentCountsContainer'); if (!container) return;
+        if (counts && counts.error) { container.innerHTML = `<span style="color: red;">Erro ao carregar contagem.</span>`; return; }
+        container.innerHTML = ''; const agentOptions = columnDefinitions['AW'] ? columnDefinitions['AW'].opcoes : [];
+        if(agentOptions.length === 0){container.innerHTML = '<span>Nenhum agente configurado.</span>'; return;}
+        for (const agentName of agentOptions) {
+            const count = counts[agentName] || 0; const color = agentColors[agentName] || agentColors['Default'];
+            const item = document.createElement('div'); item.className = 'agent-count-item';
+            item.innerHTML = `<span class="color-dot" style="background-color: ${color};"></span><span class="agent-name">${escapeHtml(agentName)}</span><span class="count">[${count}]</span>`;
+            container.appendChild(item);
+        }
+    }
+    function openModal(modalId) { gid(modalId).style.display = 'flex'; }
+    function closeModal(modalId) { gid(modalId).style.display = 'none'; }
+    function showError(error) { 
+      hideLoader(); console.error('Erro:', error);
+      const msg = (error && error.message) ? error.message : (typeof error === 'string' ? error : JSON.stringify(error));
+      showStatusMessage('Ocorreu um erro: ' + msg, 'error');
+    }
+    function escapeHtml(unsafe) {
+        if (unsafe === null || unsafe === undefined) return "";
+        return String(unsafe).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+    }
+    function updateActiveTicketInLocalStorage(ticketId, isActive) {
+        let ids = JSON.parse(localStorage.getItem('activeTicketIds')||'[]'); ids=ids.filter(id=>typeof id==='number'); 
+        if(isActive){if(!ids.includes(ticketId))ids.push(ticketId);}else{ids=ids.filter(id=>id!==ticketId);}
+        localStorage.setItem('activeTicketIds',JSON.stringify(ids));
+    }
+  </script>
+</body>
+
+</html>
